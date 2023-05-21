@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\FormateurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -36,6 +38,16 @@ class Formateur
      * @ORM\Column(type="string", length=100)
      */
     private $email;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Module::class, mappedBy="formateur")
+     */
+    private $modules;
+
+    public function __construct()
+    {
+        $this->modules = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -86,6 +98,36 @@ class Formateur
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Module>
+     */
+    public function getModules(): Collection
+    {
+        return $this->modules;
+    }
+
+    public function addModule(Module $module): self
+    {
+        if (!$this->modules->contains($module)) {
+            $this->modules[] = $module;
+            $module->setFormateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeModule(Module $module): self
+    {
+        if ($this->modules->removeElement($module)) {
+            // set the owning side to null (unless already changed)
+            if ($module->getFormateur() === $this) {
+                $module->setFormateur(null);
+            }
+        }
 
         return $this;
     }

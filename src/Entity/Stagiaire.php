@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\StagiaireRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -36,6 +38,16 @@ class Stagiaire
      * @ORM\Column(type="string", length=100)
      */
     private $email;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Note::class, mappedBy="stagiaire")
+     */
+    private $notes;
+
+    public function __construct()
+    {
+        $this->notes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -86,6 +98,36 @@ class Stagiaire
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Note>
+     */
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function addNote(Note $note): self
+    {
+        if (!$this->notes->contains($note)) {
+            $this->notes[] = $note;
+            $note->setStagiaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNote(Note $note): self
+    {
+        if ($this->notes->removeElement($note)) {
+            // set the owning side to null (unless already changed)
+            if ($note->getStagiaire() === $this) {
+                $note->setStagiaire(null);
+            }
+        }
 
         return $this;
     }
